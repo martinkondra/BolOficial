@@ -11,6 +11,7 @@ import pickle
 import nltk.classify
 from sklearn.svm import LinearSVC
 from sklearn import cross_validation
+from random import shuffle
 
 data = pickle.load(open("TaggedCorpus.p", "rb")) #lista de diccionarios (sentences)
 
@@ -114,9 +115,12 @@ def cross_validate():
     print cv
     for traincv, testcv in cv:
         classifier = maxEnt.train(training_set[traincv[0]:traincv[len(traincv)-1]])
-        accuracy.append(nltk.classify.util.accuracy(classifier, training_set[testcv[0]:testcv[len(testcv)-1]]))
+        single_accuracy = nltk.classify.util.accuracy(classifier, training_set[testcv[0]:testcv[len(testcv)-1]])
+        accuracy.append(single_accuracy)
     for item in accuracy:
         print 'accuracy', item
+    total = sum(accuracy)/len(accuracy)
+    print "Average", total
 
 if __name__ == "__main__":
     with open('anotacion.csv', 'rb') as csvfile:
@@ -128,6 +132,7 @@ if __name__ == "__main__":
         #    print item
         #    r=item[0]
         #    a = feature_extractor(r)
+        shuffle(relations)
         feature_sets = [(feature_extractor(r), t) for (r, t) in relations]
         size = int(len(feature_sets) * 0.1)  # split train_set (90%) and test_set (10$)
         # train_set, test_set, devtest_set = featuresets[size:-(size)], featuresets[:size], featuresets[-(size):]
@@ -148,6 +153,6 @@ if __name__ == "__main__":
 
     #print('naiveBayesAccuracy: {:4.2f}'.format(nltk.classify.accuracy(naiveBayes, test_set)))
     #print('decisionTreeAccuracy: {:4.2f}'.format(nltk.classify.accuracy(decisionTree, test_set)))
-    #print('maxEntAccuracy: {:4.2f}'.format(nltk.classify.accuracy(maxEnt, test_set)))
+    print('maxEntAccuracy: {:4.2f}'.format(nltk.classify.accuracy(maxEnt, test_set)))
 
-    #cross_validate()
+    cross_validate()
